@@ -4,9 +4,9 @@ function startGame(){
     app.launch('com.supercell.clashofclans');sleep(2000);
     if(clickImageWithTimeout('set',0,100000)==false){
         //如果set没找到就回到手机桌面
-        home();console.console.log("未能成功进入游戏,返回桌面"); 
+        home();console.log("未能成功进入游戏,返回桌面"); 
     }else{
-        console.console.log("成功进入游戏");
+        console.log("成功进入游戏");
         click(0,0);sleep(1000);//点击屏幕左上角返回主界面
     }
 }
@@ -22,7 +22,7 @@ function collectResource(){
         click(640,560);
         sleep(1000);//收集车里资源
         click(0,0)//点击返回
-    }else{console.console.log("资源收集完毕");}
+    }else{console.log("资源收集完毕");}
         
 }
 
