@@ -12,7 +12,7 @@ function startGame(){
 }
 //收集资源
 function collectResource(){
-    console.console.log("开始收集资源");
+    console.log("开始收集资源");
     zoom("in",323);sleep(1000);swipe360(323);
     clickImageWithTimeout('gold',1);//收集金币
     clickImageWithTimeout('water',1);//收集圣水
