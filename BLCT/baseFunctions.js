@@ -53,7 +53,10 @@ function findPicture(imageName, clickTimes, timeout) {
     timeout = timeout || 1000; // 如果未提供超时时间，默认为1000毫秒
     let startTime = new Date().getTime();
     let img, template;
-    if (!requestScreenCapture(true)) return false; // 请求屏幕截图权限，如果失败则返回false
+    if(!requestScreenCapture()){
+        toast("请求截图失败");
+        exit();
+    }    
     while (new Date().getTime() - startTime < timeout) { // 在指定时间内进行查找
         img = captureScreen(); // 截取当前屏幕
         template = images.read('res/'+ imageName +'.png'); // 读取指定图片
