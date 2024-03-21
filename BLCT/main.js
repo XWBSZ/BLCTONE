@@ -1,88 +1,36 @@
-// 封装悬浮窗功能
-function createFloatyWindow() {
-    // 创建悬浮窗数组
-    var windows = [];
-    
-    // 不同图标的路径数组
-    var iconPaths = ["file://res/run.png", "file://res/stop.png", "file://res/config.png", "file://res/close.png"];
-
-    // 让悬浮窗一直保持运行的必要代码
-    setInterval(() => {}, 1000);
-
-    // 创建主悬浮窗
-    var window = floaty.window(
-        <frame>
-            <img id="icon" src="file://res/X.png" w="20" h="20"/>
-        </frame>
-    );
-    
-    // 设置悬浮窗的初始位置
-    window.setPosition(0, 400);
-
-    // 按钮点击事件
-    window.icon.click(() => {
-        console.log("悬浮窗被点击了");
-        if (windows.length === 0) {
-            // 创建4个新的悬浮窗
-            for (let i = 0; i < 4; i++) {
-                let newWindow = floaty.window(
-                    <frame>
-                        <img id="icon" src={iconPaths[i]} w="20" h="20"/>
-                    </frame>
-                );
-                // 计算偏移量为原始宽度的1.2倍
-                let offsetX = (i + 1) * window.getWidth() ;
-                // 设置新悬浮窗的位置
-                newWindow.setPosition(window.getX() + offsetX, window.getY());
-                // 绑定不同的点击事件
-                bindClickEvent(newWindow, i);
-                // 将新悬浮窗添加到数组中
-                windows.push(newWindow);
-            }
-        } else {
-            // 收回悬浮窗
-            for (let i = 0; i < windows.length; i++) {
-                windows[i].close();
-            }
-            // 清空悬浮窗数组
-            windows = [];
-        }
-    });
-
-    // 绑定点击事件的内部函数
-    function bindClickEvent(window, index) {
-        window.icon.click(() => {
-            switch (index) {
-                case 0:
-                    // 执行启动逻辑
-                    console.log("启动");
-                    engines.execScriptFile("./启动.js");
-                    break;
-                case 1:
-                    // 执行停止逻辑
-                    console.log("停止");
-                    // 停止所有除了当前脚本之外的线程
-                    engines.all().forEach(engine => {
-                        if (engine !== engines.myEngine()) {
-                            engine.forceStop();
-                        }
-                    });
-                    break;
-                case 2:
-                    // 执行设置逻辑
-                    console.log("设置");
-                    // 在这里添加设置逻辑
-                    break;
-                case 3:
-                    // 停止包括当前在内的所有脚本
-                    engines.stopAll();
-                    exit();
-                    break;    
-                default:
-                    break;
-            }
-        });
+const { findPicture, swipe360, zoom, paddleOCR, clickOnLine } = require('./baseFunctions');
+//启动游戏
+function startGame(){
+    app.launch('com.supercell.clashofclans');sleep(2000);
+    if(!findPicture('set',0,10000)){
+        //如果set没找到就回到手机桌面
+        home();console.log("未能成功进入游戏,返回桌面"); 
+        engines.stopAll();
+    }else{
+        console.log("成功进入游戏");
+        click(0,0);sleep(1000);//点击屏幕左上角返回主界面
     }
 }
+//收集资源
+function collectResource(){
+    console.log("开始收集资源");
+    zoom("in",323);sleep(1000);swipe360(323);
+    findPicture('gold',1);//收集金币
+    findPicture('water',1);//收集圣水
+    //采集可能存在的资源车
+    if(findPicture('resourcecar',1)==true){
+        sleep(1000);
+        click(640,560);
+        sleep(1000);//收集车里资源
+        click(0,0)//点击返回
+    }else{console.log("资源收集完毕");}
+        
+}
 
-createFloatyWindow();
+// 主函数
+function RUN() {
+startGame();
+collectResource();
+}
+RUN(); // 执行运行函数
+paddleOCR("resource")

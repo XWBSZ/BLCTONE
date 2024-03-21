@@ -1,27 +1,18 @@
 auto.waitFor(); // 自动打开无障碍服务
-// 导入包
-importClass(com.googlecode.tesseract.android.TessBaseAPI);
 
 // 定义OCR识别函数
-function tessocr(imageName) {
+function paddleOCR(imageName) {
     try {
-        var tessocr = new TessBaseAPI(); // 新建OCR实例
-        var img = images.read('./res/' + imageName + '.png'); // 读取图片
-        var dataPath = files.path("./"); // 获取文件路径
-        var ok = tessocr.init(dataPath, "eng"); // 初始化OCR实例
-        if (ok) {
-            console.log("初始化成功: " + tessocr.getInitLanguagesAsString()); // 打印初始化成功信息
-        } else {
-            console.log("初始化失败"); // 打印初始化失败信息
-            return;
-        }
-        tessocr.setImage(img.getBitmap()); // 设置图片
-        var text = tessocr.getUTF8Text(); // 获取文本结果
-        var lines = text.split("\n"); // 将文本按行分割为数组
-        lines.forEach(function (line, index) { // 遍历每一行文本并打印
+        // 新增：自定义模型路径(必须是绝对路径), files.path() 将相对路径转为绝对路径
+        let myModelPath = files.path("./paddleMoudel");
+
+        var img = images.read('res/' + imageName + '.png'); // 读取图片
+
+        const stringList = paddle.ocrText(img, myModelPath); // 进行文字识别
+        stringList.forEach(function(line, index) { // 遍历每一行文本并打印
             console.log(`第 ${index + 1} 行：${line}`);
         });
-        return text; // 返回识别的文本结果
+        return stringList; // 返回识别的文本结果列表
     } catch (e) {
         console.log("识别出现异常: " + e); // 打印异常信息
     }
@@ -57,15 +48,15 @@ function clickOnLine(centerX, centerY, angle, length, numberOfPoints, totalClick
 }
 
 // 定义函数，在给定的时间内查找并点击指定图片
-function clickImageWithTimeout(imageName, clickTimes, timeout) {
+function findPicture(imageName, clickTimes, timeout) {
     clickTimes = clickTimes || 0; // 如果未提供点击次数，默认为0
     timeout = timeout || 1000; // 如果未提供超时时间，默认为1000毫秒
     let startTime = new Date().getTime();
     let img, template;
+    if (!requestScreenCapture(true)) return false; // 请求屏幕截图权限，如果失败则返回false
     while (new Date().getTime() - startTime < timeout) { // 在指定时间内进行查找
-        if (!requestScreenCapture(true)) return false; // 请求屏幕截图权限，如果失败则返回false
         img = captureScreen(); // 截取当前屏幕
-        template = images.read('./res/'+ imageName +'.png'); // 读取指定图片
+        template = images.read('res/'+ imageName +'.png'); // 读取指定图片
         let p = images.findImage(img, template, { threshold: 0.7 }); // 查找图片位置
         if (p) { // 如果找到图片
             let pos = { x: p.x + template.width / 2, y: p.y + template.height / 2 }; // 计算图片中心位置
@@ -122,9 +113,9 @@ function zoom(type, angle, x, y, radius, duration) {
 
 // 导出函数
 module.exports = {
-    tessocr,
+    paddleOCR,
     clickOnLine,
-    clickImageWithTimeout,
+    findPicture,
     swipe360,
     zoom
 };
