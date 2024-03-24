@@ -1,70 +1,85 @@
-// 导入所需的基础函数
-var bF = require('./baseFunctions');
+// 封装悬浮窗功能
+function createFloatyWindow() {
+    // 创建悬浮窗数组
+    var windows = [];
+    
+    // 不同图标的路径数组
+    var iconPaths = ["file://res/run.png", "file://res/stop.png", "file://res/config.png", "file://res/close.png"];
 
-// 封装启动游戏函数
-function startGame() {
-    app.launch('com.supercell.clashofclans');
-    sleep(2000);
-    if (!bF.findImg('set', 0, 3000)) {
-        console.log("正在重新尝试识别图标");
-        sleep(1000);
-        if (!bF.findImg('set', 0, 20000)) {
-            console.log("启动游戏失败");
-            home();
-            engines.stopAllAndToast();
-            return false; // 返回 false 表示启动游戏失败
+    // 让悬浮窗一直保持运行的必要代码
+    setInterval(() => {}, 1000);
+
+    // 创建主悬浮窗
+    var window = floaty.window(
+        <frame>
+            <img id="icon" src="file://res/X.png" w="20" h="20"/>
+        </frame>
+    );
+    
+    // 按钮点击事件
+    window.icon.click(() => {
+        console.log("悬浮窗被点击了");
+        if (windows.length === 0) {
+            // 创建4个新的悬浮窗
+            for (let i = 0; i < 4; i++) {
+                let newWindow = floaty.window(
+                    <frame>
+                        <img id="icon" src={iconPaths[i]} w="20" h="20"/>
+                    </frame>
+                );
+                // 计算偏移量为原始宽度的1.2倍
+                let offsetX = (i + 1) * window.getWidth() ;
+                // 设置新悬浮窗的位置
+                newWindow.setPosition(window.getX() + offsetX, window.getY());
+                // 绑定不同的点击事件
+                bindClickEvent(newWindow, i);
+                // 将新悬浮窗添加到数组中
+                windows.push(newWindow);
+            }
+        } else {
+            // 收回悬浮窗
+            for (let i = 0; i < windows.length; i++) {
+                windows[i].close();
+            }
+            // 清空悬浮窗数组
+            windows = [];
         }
+    });
+
+    // 绑定点击事件的内部函数
+    function bindClickEvent(window, index) {
+        window.icon.click(() => {
+            switch (index) {
+                case 0:
+                    // 执行启动逻辑
+                    console.log("启动");
+                    engines.execScriptFile("./main.js");
+                    break;
+                case 1:
+                    // 执行停止逻辑
+                    console.log("停止");
+                    // 停止所有除了当前脚本之外的线程
+                    engines.all().forEach(engine => {
+                        if (engine !== engines.myEngine()) {
+                            engine.forceStop();
+                        }
+                    });
+                    break;
+                case 2:
+                    // 执行设置逻辑
+                    console.log("设置");
+                    // 在这里添加设置逻辑
+                    break;
+                case 3:
+                    // 停止包括当前在内的所有脚本
+                    engines.stopAll();
+                    exit();
+                    break;    
+                default:
+                    break;
+            }
+        });
     }
-    console.log("成功进入游戏");
-    click(0, 0);
-    sleep(1000);
-    return true; // 返回 true 表示成功进入游戏
 }
 
-// 封装收集资源函数
-function collectResource() {
-    console.log("开始收集资源");
-    bF.zoom("in", 323);
-    sleep(1000);
-    bF.swipe360(323);
-    bF.findImg('gold', 1);
-    bF.findImg('water', 1);
-    if (bF.findImg('resourcecar', 1) == true) {
-        sleep(1000);
-        click(640, 560);
-        sleep(1000);
-        click(0, 0);
-    } else {
-        console.log("资源收集完毕");
-    }
-}
-//训练部队函数
-// function trainTroop() {
-//     console.log("开始训练部队");
-//     click(50, 525);//打开训练界面
-//     sleep(1000);
-//     click(400, 55);//点击训练部队
-//     sleep(1000);
-//     //
-//     longclick(170,440);//长按训练部队
-//     //在特定区域里查找是否有训练尚未完成的图标
-//     sleep(1000);
-//     if (bF.findImg('time', 1) == true) {
-//         console.log("有部队正在训练中");
-//         return;
-//     }
-//     bF.swipe360(323
-
-
-// 封装运行游戏函数
-function runGame() {
-    if (!startGame()) {
-        return; // 如果启动游戏失败，直接返回
-    }
-    collectResource();
-
-    bF.clickLine(37,930,580,200,5,10);
-}
-runGame();
-
-toast(bF.ocr("resource",1120, 30, 100, 100));
+createFloatyWindow();
