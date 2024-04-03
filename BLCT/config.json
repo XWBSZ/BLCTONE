@@ -1,0 +1,23 @@
+{
+    "troops": [
+      {
+        "name": "Giant",
+        "quantity": 1
+      },
+      {
+        "name": "Barbarian",
+        "quantity": 1
+      },
+      {
+        "name": "Archer",
+        "quantity": 1
+      }
+    ],
+    "target_resources": {
+      "tar_gold": 5000,
+      "tar_water": 1000,
+      "tar_oil": 0,
+      "tar_trophies": 25
+    }
+  }
+  

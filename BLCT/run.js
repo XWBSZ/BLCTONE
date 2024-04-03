@@ -1,6 +1,6 @@
 // 导入所需的基础函数
 var bF = require('./baseFunctions');
-// 封装启动游戏函数
+// 启动游戏函数
 function startGame() {
     home(); // 返回桌面
     sleep(1000); // 等待1秒
@@ -29,7 +29,7 @@ function startGame() {
     engines.stopAllAndToast(); // 停止所有引擎并提示用户
     return false; // 返回 false 表示启动游戏失败
 }
-// 封装收集资源函数
+// 收集资源函数
 function collectResource() {
     console.log("先查看是否有资源车可以收集");
     bF.zoom("in", 323);
@@ -48,93 +48,9 @@ function collectResource() {
     console.log("资源收集完毕");
 
 }
-
-//训练部队函数
-// function trainTroop() {
-//     console.log("开始训练部队");
-//     click(50, 525);//打开训练界面
-//     sleep(1000);
-//     click(400, 55);//点击训练部队
-//     sleep(1000);
-//     //
-//     longclick(170,440);//长按训练部队
-//     //在特定区域里查找是否有训练尚未完成的图标
-//     sleep(1000);
-//     if (bF.findImg('time', 1) == true) {
-//         console.log("有部队正在训练中");
-//         return;
-//     }
-//     bF.swipe360(323
-
-
-// 封装运行游戏函数
-function runGame() {
-    startGame();
-        
-    // collectResource();
-upgradeBuilding(39);
-
+//从上到下读取资源
+function read () {
+    //
 }
-runGame();
-
-// 函数：升级建筑
-function upgradeBuilding(initialY) {
-    let yIncrement = initialY; // Y坐标增量
-    let gemNeededCount = 0; // 需要宝石的计数
-
-    // 尝试升级建筑最多3次
-    for (let attempt = 0; attempt < 3; attempt++) {
-        // 点击建筑按钮以打开建筑界面
-        click(580, 45);
-        sleep(1000);
-
-        // 识别建筑文本位置
-        let textPosition = bF.ocr("building", 490, 100, 150, 300, "建议升级");
-        sleep(3000);
-
-        // 如果找到建议升级文本
-        if (textPosition !== null) {
-            // 点击第一个建筑以进行升级
-            click(textPosition.x, textPosition.y + yIncrement);
-            sleep(1000);
-
-            // 查找并点击升级按钮
-            bF.findImg('upgrade', 1);
-            sleep(1000);
-            click(900, 630); // 确认升级
-            sleep(1000);
-
-            // 检查是否需要宝石
-            if (bF.findImg('needGem')) {
-                console.log("此建筑需要宝石才能升级");
-                gemNeededCount++; // 增加需要宝石的计数
-                if (gemNeededCount === 3) {
-                    console.log("连续三次都需要宝石，退出循环");
-                    break; // 连续3次都需要宝石，退出循环
-                }
-                yIncrement += initialY; // 增加Y坐标增量
-            } else {
-                console.log("升级成功，继续下一个建筑");
-                gemNeededCount = 0; // 重置需要宝石的计数
-                yIncrement = initialY; // 重置Y坐标增量
-            }
-        } else {
-            break; // 未找到建议升级文本，退出循环
-        }
-
-        // 返回建筑界面
-        for (let i = 0; i < 2; i++) {
-            click(0, 0);
-            sleep(1000);
-        }
-    }
-
-    // 退出循环后要返回3次
-    for (let i = 0; i < 3; i++) {
-        click(0, 0);
-        sleep(1000);
-    }
-}
-
-
-
+startGame();
+collectResource();

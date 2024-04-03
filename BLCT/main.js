@@ -53,7 +53,7 @@ function createFloatyWindow() {
                 case 0:
                     // 执行启动逻辑
                     console.log("启动");
-                    engines.execScriptFile("./main.js");
+                    engines.execScriptFile("./run.js");
                     break;
                 case 1:
                     // 执行停止逻辑
