@@ -1,57 +1,102 @@
-auto.waitFor();
-
-function ocr(imgName, scrX, scrY, width, height, tgtText) {
-    tgtText = tgtText || null;
-    if (!requestScreenCapture()) { console.log('请求截图失败'); exit(); }
-    var img = captureScreen(), imgClip = images.clip(img, scrX, scrY, width, height), imgPath = "res/" + imgName + ".png";
-    images.save(imgClip, imgPath);
-    console.log("裁剪后的图片已保存至: " + imgPath);
-    sleep(1000);
-    var mdlPath = files.path("./paddleMoudel"), image = images.read(imgPath), ocrRes = paddle.ocr(image, mdlPath);
-    if (tgtText === null) { ocrRes.forEach(function(textObj, index) { console.log(`第 ${index + 1} 行：${textObj.text}`); }); return null; } 
-    else { var tgtPos = ocrRes.find(function(textObj) { return textObj.text.includes(tgtText); }); if (tgtPos) { var { left, top, right, bottom } = tgtPos.bounds, centerX = (left + right) / 2 + scrX, centerY = (top + bottom) / 2 + scrY;
-            console.log(`${tgtText}中心坐标:(${centerX},${centerY})`); return { x: centerX, y: centerY }; } else { console.log(`未找到文本 "${tgtText}"`); return null; } } }
-
-function clickLine(angle, cX, cY, length, nPts, tClks) {
-    var angleRad = (angle % 360) * Math.PI / 180, x1 = Math.round(cX - (length / 2) * Math.cos(angleRad)), y1 = Math.round(cY + (length / 2) * Math.sin(angleRad)), x2 = Math.round(cX + (length / 2) * Math.cos(angleRad)), y2 = Math.round(cY - (length / 2) * Math.sin(angleRad)), startPoint = { x: x1, y: y1 }, endPoint = { x: x2, y: y2 }, slope = (endPoint.x !== startPoint.x) ? (endPoint.y - startPoint.y) / (endPoint.x - startPoint.x) : Infinity, points = [];
-    for (var i = 0; i < nPts; i++) { var randomX = (slope !== Infinity) ? Math.round(random(startPoint.x, endPoint.x)) : startPoint.x, randomY = (slope !== Infinity) ? Math.round(slope * (randomX - startPoint.x) + startPoint.y) : Math.round(random(startPoint.y, endPoint.y));
-        points.push({ x: randomX, y: randomY }); }
-    for (var i = 0; i < tClks; i++) { var point = points[i % points.length];
+const autoWaitFor = () => {
+    if (!requestScreenCapture()) {
+        console.log('请求截图失败');
+        exit();
+    }
+};
+const ocr = (imgName, screenX, screenY, width, height, targetText) => {
+    targetText = targetText || null;
+    autoWaitFor();
+    const imagePath = `res/${imgName}.png`;
+    const modelPath = files.path("./paddleModel");
+    const screenImg = captureScreen();
+    const clippedImg = images.clip(screenImg, screenX, screenY, width, height);
+    images.save(clippedImg, imagePath);
+    const ocrResult = paddle.ocr(images.read(imagePath), modelPath);
+    if (!targetText) {
+        if (ocrResult.length === 1) return null;
+        return ocrResult.map(text => text.text);
+    }
+    const targetPosition = ocrResult.find(txt => txt.text.includes(targetText));
+    return targetPosition ? { x: (targetPosition.bounds.left + targetPosition.bounds.right) / 2 + screenX, y: (targetPosition.bounds.top + targetPosition.bounds.bottom) / 2 + screenY } : null;
+};
+const findImage = (imageName, clickTimes, timeout, searchArea) => {
+    clickTimes = clickTimes || 0;
+    timeout = timeout || 1000;
+    searchArea = searchArea || { x: 0, y: 0, width: 1280, height: 720 };
+    autoWaitFor();
+    const startTime = new Date().getTime();
+    while (new Date().getTime() - startTime < timeout) {
+        const screenImg = images.clip(captureScreen(), searchArea.x, searchArea.y, searchArea.width, searchArea.height);
+        sleep(200);
+        const templateImg = images.read(`res/${imageName}.png`);
+        const position = images.findImage(screenImg, templateImg, { threshold: 0.7 });
+        if (position) {
+            const offsetX = searchArea.x + position.x + templateImg.width / 2;
+            const offsetY = searchArea.y + position.y + templateImg.height / 2;
+            if (clickTimes > 0) {
+                click(offsetX, offsetY);
+                for (let i = 0; i < clickTimes - 1; i++) {
+                    console.log(`点击坐标：(${offsetX}, ${offsetY})`);
+                    click(offsetX, offsetY);
+                    console.log(`点击图片: ${imageName} ${i + 1}次`);
+                    sleep(random(50, 100));
+                }
+            }
+            return { x: offsetX, y: offsetY };
+        }
+    }
+    console.log(`超时未在指定区域找到图片: ${imageName}`);
+    return null;
+};
+const clickLine = (angle, centerX, centerY, length, numPoints, timeClicks) => {
+    const angleRad = (angle % 360) * Math.PI / 180;
+    const x1 = Math.round(centerX - (length / 2) * Math.cos(angleRad));
+    const y1 = Math.round(centerY + (length / 2) * Math.sin(angleRad));
+    const x2 = Math.round(centerX + (length / 2) * Math.cos(angleRad));
+    const y2 = Math.round(centerY - (length / 2) * Math.sin(angleRad));
+    const startPoint = { x: x1, y: y1 };
+    const endPoint = { x: x2, y: y2 };
+    const slope = (endPoint.x !== startPoint.x) ? (endPoint.y - startPoint.y) / (endPoint.x - startPoint.x) : Infinity;
+    const points = [];
+    for (let i = 0; i < numPoints; i++) {
+        const randomX = (slope !== Infinity) ? Math.round(random(startPoint.x, endPoint.x)) : startPoint.x;
+        const randomY = (slope !== Infinity) ? Math.round(slope * (randomX - startPoint.x) + startPoint.y) : Math.round(random(startPoint.y, endPoint.y));
+        points.push({ x: randomX, y: randomY });
+    }
+    for (let i = 0; i < timeClicks; i++) {
+        const point = points[i % points.length];
         console.log(`点击坐标：(${point.x}, ${point.y})`);
         click(point.x, point.y);
-        sleep(random(30, 60)); } }
-
-function findImg(imgName, clkTimes, timeout, searchArea) {
-    if (!requestScreenCapture()) { console.error('请求截图失败'); exit(); }
-    clkTimes = clkTimes || 0;
-    timeout = timeout || 1000;
-    if (!searchArea) { searchArea = { x: 0, y: 0, width: 1280, height: 720 }; }
-    var startTime = new Date().getTime();
-    while (new Date().getTime() - startTime < timeout) { let img = captureScreen();
-        img = images.clip(img, searchArea.x, searchArea.y, searchArea.width, searchArea.height);
-        sleep(200); let tpl = images.read('res/' + imgName + '.png');
-        var p = images.findImage(img, tpl, { threshold: 0.7 }); if (p) { var centerX = p.x + tpl.width / 2, centerY = p.y + tpl.height / 2, pos = { x: centerX, y: centerY };
-            console.log(`成功在指定区域找到图片: ${imgName}`);
-            for (let i = 0; i < clkTimes; i++) { click(centerX, centerY); console.log(`点击图片: ${imgName} ${i + 1}次`); sleep(random(50, 100)); }
-            img.recycle();
-            tpl.recycle(); return { found: true, position: pos }; } }
-    console.log(`超时未在指定区域找到图片: ${imgName}`);
-    return { found: false, position: null }; }
-
-function swipe360(angle, x, y, radius, duration) {
+        sleep(random(30, 60));
+    }
+};
+const swipe360 = (angle, x, y, radius, duration) => {
     x = x || 640;
     y = y || 360;
     radius = radius || 220;
     duration = duration || 1000;
-    var endX = x + radius * Math.cos(angle * Math.PI / 180), endY = y - radius * Math.sin(angle * Math.PI / 180), offsetX = 2 * x - endX, offsetY = 2 * y - endY;
-    swipe(offsetX, offsetY, endX, endY, duration); }
-
-function zoom(type, angle, x, y, radius, duration) {
+    const endX = x + radius * Math.cos(angle * Math.PI / 180);
+    const endY = y - radius * Math.sin(angle * Math.PI / 180);
+    const offsetX = 2 * x - endX;
+    const offsetY = 2 * y - endY;
+    swipe(offsetX, offsetY, endX, endY, duration);
+};
+const zoom = (type, angle, x, y, radius, duration) => {
     x = x || 640;
     y = y || 360;
     radius = radius || 220;
     duration = duration || 1000;
-    var startX = x + radius * Math.cos(angle * Math.PI / 180), startY = y - radius * Math.sin(angle * Math.PI / 180), endX = x - radius * Math.cos(angle * Math.PI / 180), endY = y + radius * Math.sin(angle * Math.PI / 180);
-    if (type === "in") { gestures([duration, [startX, startY], [x, y]], [duration, [endX, endY], [x, y]]); } else if (type === "out") { gestures([duration, [x, y], [startX, startY]], [duration, [x, y], [endX, endY]]); } else { console.log("方向参数只能是 'in' 或 'out'"); } }
-
-module.exports = { ocr, clickLine, findImg, swipe360, zoom };
+    const startX = x + radius * Math.cos(angle * Math.PI / 180);
+    const startY = y - radius * Math.sin(angle * Math.PI / 180);
+    const endX = x - radius * Math.cos(angle * Math.PI / 180);
+    const endY = y + radius * Math.sin(angle * Math.PI / 180);
+    if (type === "in") {
+        gestures([duration, [startX, startY], [x, y]], [duration, [endX, endY], [x, y]]);
+    } else if (type === "out") {
+        gestures([duration, [x, y], [startX, startY]], [duration, [x, y], [endX, endY]]);
+    } else {
+        console.log("方向参数只能是 'in' 或 'out'");
+    }
+};
+module.exports = { ocr, findImage, clickLine, swipe360, zoom };
