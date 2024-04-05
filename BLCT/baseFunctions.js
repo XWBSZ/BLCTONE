@@ -1,25 +1,18 @@
-const autoWaitFor = () => {
-    if (!requestScreenCapture()) {
-        console.log('请求截图失败');
-        exit();
-    }
-};
+const autoWaitFor = () => { if (!requestScreenCapture()) { console.log('请求截图失败'); exit(); } };
+
 const ocr = (imgName, screenX, screenY, width, height, targetText) => {
     targetText = targetText || null;
-    autoWaitFor();
-    const imagePath = `res/${imgName}.png`;
+    autoWaitFor(); const imagePath = `res/${imgName}.png`;
     const modelPath = files.path("./paddleModel");
     const screenImg = captureScreen();
     const clippedImg = images.clip(screenImg, screenX, screenY, width, height);
     images.save(clippedImg, imagePath);
     const ocrResult = paddle.ocr(images.read(imagePath), modelPath);
-    if (!targetText) {
-        if (ocrResult.length === 1) return null;
-        return ocrResult.map(text => text.text);
-    }
+    if (!targetText) { if (ocrResult.length === 1) return null; return ocrResult.map(text => text.text); }
     const targetPosition = ocrResult.find(txt => txt.text.includes(targetText));
     return targetPosition ? { x: (targetPosition.bounds.left + targetPosition.bounds.right) / 2 + screenX, y: (targetPosition.bounds.top + targetPosition.bounds.bottom) / 2 + screenY } : null;
 };
+
 const findImage = (imageName, clickTimes, timeout, searchArea) => {
     clickTimes = clickTimes || 0;
     timeout = timeout || 1000;
@@ -49,6 +42,7 @@ const findImage = (imageName, clickTimes, timeout, searchArea) => {
     console.log(`超时未在指定区域找到图片: ${imageName}`);
     return null;
 };
+
 const clickLine = (angle, centerX, centerY, length, numPoints, timeClicks) => {
     const angleRad = (angle % 360) * Math.PI / 180;
     const x1 = Math.round(centerX - (length / 2) * Math.cos(angleRad));
@@ -71,6 +65,7 @@ const clickLine = (angle, centerX, centerY, length, numPoints, timeClicks) => {
         sleep(random(30, 60));
     }
 };
+
 const swipe360 = (angle, x, y, radius, duration) => {
     x = x || 640;
     y = y || 360;
@@ -82,6 +77,7 @@ const swipe360 = (angle, x, y, radius, duration) => {
     const offsetY = 2 * y - endY;
     swipe(offsetX, offsetY, endX, endY, duration);
 };
+
 const zoom = (type, angle, x, y, radius, duration) => {
     x = x || 640;
     y = y || 360;
@@ -99,4 +95,5 @@ const zoom = (type, angle, x, y, radius, duration) => {
         console.log("方向参数只能是 'in' 或 'out'");
     }
 };
+
 module.exports = { ocr, findImage, clickLine, swipe360, zoom };
