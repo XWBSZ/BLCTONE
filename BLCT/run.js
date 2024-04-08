@@ -40,6 +40,7 @@ function collectResource() {
     click(640,560);//点击收集
     sleep(1000);
     click(0,0);//点击空白
+    sleep(1000);
     bF.findAndClick('tombstone', 1);
     bF.findAndClick('gold', 1);
     bF.findAndClick('water', 1);

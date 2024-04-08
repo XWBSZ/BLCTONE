@@ -14,10 +14,10 @@
       }
     ],
     "target_resources": {
-      "tar_gold": 2000,
-      "tar_water": 1000,
-      "tar_oil": 0,
-      "tar_cup": 30
+      "tar_gold": 0,
+      "tar_water": 0,
+      "tar_oil": -1,
+      "tar_cup": 35
     }
   }
   
