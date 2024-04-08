@@ -11,5 +11,5 @@ function ClipScreenshot(x, y, width, height, imageName) {
     var imagePath = "./res/" + imageName + ".png";
     images.save(imgclip, imagePath);
 }
-ClipScreenshot(175,295,55,35 ,'resourceCar');
-// //导出
+ClipScreenshot(180,310,40,20 ,'resourceCar');
+//导出

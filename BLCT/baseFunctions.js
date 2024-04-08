@@ -64,7 +64,7 @@ function findAndClick(imageName, clickTimes, x, y, width, height) {
     }
     const screenImg = captureScreen();
     const clippedImg = images.clip(screenImg, x, y, width, height);
-    const position = images.findImage(clippedImg, templateImg, { threshold: 0.8 });
+    const position = images.findImage(clippedImg, templateImg, { threshold: 0.7 });
     // 若找到图像，则点击指定次数
     if (position) {
         console.log(`找到图片: ${imageName}`);

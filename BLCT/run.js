@@ -31,25 +31,19 @@ function startGame() {
 }
 // 收集主世界资源函数
 function collectResource() {
-    console.log("先查看是否有资源车可以收集");
-    sleep(1000);
     bF.zoom("in", 323);
     sleep(1000);
     bF.swipe360(323);
     sleep(1000);
-    var resourceCarPos = bF.findAndClick('resourceCar',0,175,295,55,35);
-    if (resourceCarPos) {
-        console.log("有资源车可以收集");
-        sleep(1000);
-        click (resourceCarPos.x,resourceCarPos.y+25)
-        sleep(1000);
-        click(620,560);//确认收集
-        sleep(1000);
-        click(0, 0);//点击空白
-    }
+    click(200,340);//点击资源车的位置
+    sleep(1000);
+    click(640,560);//点击收集
+    sleep(1000);
+    click(0,0);//点击空白
     bF.findAndClick('tombstone', 1);
     bF.findAndClick('gold', 1);
     bF.findAndClick('water', 1);
     bF.findAndClick('oil', 1);
     console.log("资源收集完毕");
 }
+collectResource ();
