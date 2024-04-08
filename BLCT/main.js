@@ -12,7 +12,7 @@ function createFloatyWindow() {
     // 创建主悬浮窗
     var window = floaty.window(
         <frame>
-            <img id="icon" src="file://res/X.png" w="20" h="20"/>
+            <img id="icon" src="file://res/X.png" w="15" h="15"/>
         </frame>
     );
     
@@ -24,7 +24,7 @@ function createFloatyWindow() {
             for (let i = 0; i < 4; i++) {
                 let newWindow = floaty.window(
                     <frame>
-                        <img id="icon" src={iconPaths[i]} w="20" h="20"/>
+                        <img id="icon" src={iconPaths[i]} w="15" h="15"/>
                     </frame>
                 );
                 // 计算偏移量为原始宽度的1.2倍

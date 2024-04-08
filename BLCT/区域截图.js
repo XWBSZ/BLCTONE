@@ -8,9 +8,8 @@ function ClipScreenshot(x, y, width, height, imageName) {
     var img = captureScreen();
     var imgclip = images.clip(img, x, y, width, height);
     // 构建图片路径
-    var imagePath = "./res/" + imageName + ".jpg";
+    var imagePath = "./res/" + imageName + ".png";
     images.save(imgclip, imagePath);
 }
-ClipScreenshot(15, 100, 200, 155, "666");
+ClipScreenshot(175,295,55,35 ,'resourceCar');
 // //导出
-// module.exports = ClipScreenshot;

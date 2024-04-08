@@ -14,10 +14,10 @@
       }
     ],
     "target_resources": {
-      "tar_gold": 5000,
+      "tar_gold": 2000,
       "tar_water": 1000,
       "tar_oil": 0,
-      "tar_trophy": 25
+      "tar_cup": 30
     }
   }
   
